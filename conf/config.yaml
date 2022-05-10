@@ -1,0 +1,5 @@
+defaults:
+  - _self_
+  - environment: doc
+  - model: config
+  - training: base_parameter

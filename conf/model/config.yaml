@@ -1,0 +1,12 @@
+inception:
+  num_attributes: 112
+  aux_logits: true
+  transform_input: true
+  pretrained: true
+  output_activation: sigmoid # options: sigmoid, tanh
+  freeze_inception: true
+
+dnf:
+  num_preds: 112
+  num_conjuncts: 9
+  num_classes: 3

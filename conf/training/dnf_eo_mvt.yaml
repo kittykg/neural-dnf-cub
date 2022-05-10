@@ -1,0 +1,19 @@
+defaults:
+  - base_parameter
+
+use_cuda: true
+experiment_name: dnf_eo_mvt
+
+dnf_eo:
+  optimiser: adam
+  optimiser_lr: 0.001
+  optimiser_weight_decay: 0.00004
+  scheduler_step: 100
+  loss_func: ce
+  batch_size: 256
+  epochs: 225
+  initial_delta: 0.1
+  delta_decay_delay: 5
+  delta_decay_steps: 1
+  delta_decay_rate: 1.05
+  reg_lambda: 0.3
