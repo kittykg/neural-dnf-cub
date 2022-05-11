@@ -131,3 +131,7 @@ dmypy.json
 # IDEs
 .idea/
 .vscode/
+
+# experiment output
+outputs/
+notebooks/

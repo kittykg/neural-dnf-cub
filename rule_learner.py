@@ -84,8 +84,8 @@ class DNFClassifierEO(DNFBasedClassifier):
             layer_type=SemiSymbolicLayerType.CONJUNCTION,
             delta=delta,
         )
-        self.eo_layer.weights.fill_(-6)
-        self.eo_layer.weights.fill_diagonal_(0)
+        self.eo_layer.weights.data.fill_(-6)
+        self.eo_layer.weights.data.fill_diagonal_(0)
         self.eo_layer.requires_grad_(False)
 
     def forward(self, input: Tensor) -> Tensor:

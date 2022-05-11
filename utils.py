@@ -1,3 +1,4 @@
+import random
 from typing import Dict, List, Optional, Tuple, Union
 
 import torch
@@ -14,16 +15,30 @@ from rule_learner import DNFBasedClassifier
 #                              Dataset utils                                   #
 ################################################################################
 
+FULL_PKL_KEYS = ["full_train_pkl", "full_val_pkl", "full_test_pkl"]
+PARTIAL_PKL_KEYS = ["partial_train_pkl", "partial_val_pkl", "partial_test_pkl"]
+
 
 def load_partial_cub_data(
     is_training: bool,
     batch_size: int,
     data_path_dict: Dict[str, str],
     selected_classes: Optional[List[int]] = None,
+    random_select: Optional[int] = None,
     use_img_tensor: bool = True,
 ) -> Union[Tuple[DataLoader, DataLoader], DataLoader]:
+    if not selected_classes and not random_select:
+        # Use exisiting pkl files
+        # data_path_dict should contain specified pkl file path
+        return _load_cub_data(
+            is_training=is_training,
+            batch_size=batch_size,
+            data_path_list=[data_path_dict[k] for k in PARTIAL_PKL_KEYS],
+            cub_img_dir=data_path_dict["cub_images_dir"],
+            use_img_tensor=use_img_tensor,
+        )
 
-    return
+    # TODO: implement selected classes and random select
 
 
 def load_full_cub_data(
@@ -32,38 +47,81 @@ def load_full_cub_data(
     data_path_dict: Dict[str, str],
     use_img_tensor: bool = True,
 ) -> Union[Tuple[DataLoader, DataLoader], DataLoader]:
+    return _load_cub_data(
+        is_training=is_training,
+        batch_size=batch_size,
+        data_path_list=[data_path_dict[k] for k in FULL_PKL_KEYS],
+        cub_img_dir=data_path_dict["cub_images_dir"],
+        use_img_tensor=use_img_tensor,
+    )
+
+
+def _load_cub_data(
+    is_training: bool,
+    batch_size: int,
+    data_path_list: List[str],
+    cub_img_dir: str,
+    selected_classes: Optional[List[int]] = None,
+    use_img_tensor: bool = True,
+) -> Union[Tuple[DataLoader, DataLoader], DataLoader]:
+    """Load partial CUB data according to selected classes
+
+    Args:
+        is_training (bool): is training or not.
+        batch_size (int): batch size.
+        data_path_list (List[str]): list of pickle pile string, HAS TO BE IN THE
+        OREDR of train, val and test.
+        cub_img_dir (str): CUB dataset images directory.
+        selected_classes (Optional[List[int]], optional): selected classes.
+        Defaults to None.
+        use_img_tensor (bool, optional): whether load images as tensor. If not,
+        dummy image tensor are created instead of loading the image from file.
+        Defaults to True.
+
+    Returns:
+        Union[Tuple[DataLoader, DataLoader], DataLoader]: target dataloader(s)
+    """
+
+    def _get_data_from_pkl(data_pkl_path: str) -> List[CUBDNDataItem]:
+        import pickle
+
+        with open(data_pkl_path, "rb") as f:
+            return pickle.load(f)
+
+    def _get_partial_data(data_pkl_path: str) -> List[CUBDNDataItem]:
+        assert selected_classes
+        full_data = _get_data_from_pkl(data_pkl_path)
+        return [d for d in full_data if d.label in selected_classes]
+
+    data_collect_fn = (
+        _get_partial_data if selected_classes else _get_data_from_pkl
+    )
+
     if is_training:
         train_loader = _get_cub_dataloader(
-            dataset=_get_data(data_path_dict["train_pkl"]),
+            dataset=data_collect_fn(data_path_list[0]),
             is_training=is_training,
             batch_size=batch_size,
-            cub_img_dir=data_path_dict["cub_images_dir"],
+            cub_img_dir=cub_img_dir,
             use_img_tensor=use_img_tensor,
         )
         val_loader = _get_cub_dataloader(
-            dataset=_get_data(data_path_dict["val_pkl"]),
+            dataset=data_collect_fn(data_path_list[1]),
             is_training=is_training,
             batch_size=batch_size,
-            cub_img_dir=data_path_dict["cub_images_dir"],
+            cub_img_dir=cub_img_dir,
             use_img_tensor=use_img_tensor,
         )
         return train_loader, val_loader
     else:
         test_loader = _get_cub_dataloader(
-            dataset=_get_data(data_path_dict["test_pkl"]),
+            dataset=data_collect_fn(data_path_list[2]),
             is_training=is_training,
             batch_size=batch_size,
-            cub_img_dir=data_path_dict["cub_images_dir"],
+            cub_img_dir=cub_img_dir,
             use_img_tensor=use_img_tensor,
         )
         return test_loader
-
-
-def _get_data(data_pth_path: str) -> List[CUBDNDataItem]:
-    import pickle
-
-    with open(data_pth_path, "rb") as f:
-        return pickle.load(f)
 
 
 def _get_cub_dataloader(

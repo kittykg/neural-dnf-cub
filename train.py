@@ -2,7 +2,7 @@ import logging
 from typing import Callable, Dict, Iterable, OrderedDict
 
 import matplotlib.pyplot as plt
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
@@ -16,13 +16,14 @@ from utils import (
     load_full_cub_data,
     get_dnf_classifier_x_and_y,
     DeltaDelayedExponentialDecayScheduler,
+    load_partial_cub_data,
+    FULL_PKL_KEYS,
+    PARTIAL_PKL_KEYS,
 )
 
 
 log = logging.getLogger()
 
-FULL_PKL_KEYS = ["full_train_pkl", "full_val_pkl", "full_test_pkl"]
-PARTIAL_PKL_KEYS = ["partial_train_pkl", "partial_val_pkl", "partial_test_pkl"]
 
 loss_func_map: Dict[str, Callable[[Tensor, Tensor], Tensor]] = {
     "bce": lambda y_hat, y: torch.mean(
@@ -77,31 +78,57 @@ class DnfClassifierTrainer:
         use_partial_cub = cfg["training"]["use_partial_cub"]
         partial_cub_cfg = cfg["training"]["partial_cub"]
 
+        batch_size = self.model_train_cfg["batch_size"]
+
+        def _get_full_cub_data_path_dict():
+            for k in FULL_PKL_KEYS:
+                assert k in env_cfg
+            data_path_dict = {}
+            for k in FULL_PKL_KEYS:
+                data_path_dict[k] = env_cfg[k]
+            data_path_dict["cub_images_dir"] = env_cfg["cub_images_dir"]
+            return data_path_dict
+
+        def _get_partial_cub_data_path_dict():
+            for k in PARTIAL_PKL_KEYS:
+                assert k in partial_cub_cfg
+            data_path_dict = {}
+            for k in PARTIAL_PKL_KEYS:
+                data_path_dict[k] = partial_cub_cfg[k]
+            data_path_dict["cub_images_dir"] = env_cfg["cub_images_dir"]
+            return data_path_dict
+
         if use_partial_cub and "selected_classes" in partial_cub_cfg:
             # Use selected classes
+            selected_classes = OmegaConf.to_container(
+                partial_cub_cfg["selected_classes"]
+            )
+            self.train_loader, self.val_loader = load_partial_cub_data(
+                is_training=True,
+                batch_size=batch_size,
+                data_path_dict=_get_full_cub_data_path_dict(),
+                selected_classes=selected_classes,
+                use_img_tensor=False,
+            )
             pass
-        elif use_partial_cub and 'random_select' in partial_cub_cfg:
+        elif use_partial_cub and "random_select" in partial_cub_cfg:
             # Randomly select a number of classes, based on 'random_select'
             pass
         elif use_partial_cub:
             # Use existing pkl files
-            pass
+            self.train_loader, self.val_loader = load_partial_cub_data(
+                is_training=True,
+                batch_size=batch_size,
+                data_path_dict=_get_partial_cub_data_path_dict(),
+                use_img_tensor=False
+            )
         else:
-            for k in FULL_PKL_KEYS:
-                assert k in env_cfg
-            data_path_dict = {}
-            for k1, k2 in zip(
-                ["train_pkl", "val_pkl", "test_pkl"], FULL_PKL_KEYS
-            ):
-                data_path_dict[k1] = env_cfg[k2]
-            data_path_dict["cub_images_dir"] = env_cfg["cub_images_dir"]
-
-        self.train_loader, self.val_loader = load_full_cub_data(
-            is_training=True,
-            batch_size=self.model_train_cfg["batch_size"],
-            data_path_dict=data_path_dict,
-            use_img_tensor=False,
-        )
+            self.train_loader, self.val_loader = load_full_cub_data(
+                is_training=True,
+                batch_size=batch_size,
+                data_path_dict=_get_full_cub_data_path_dict(),
+                use_img_tensor=False,
+            )
 
         # Optimiser
         lr = self.model_train_cfg["optimiser_lr"]

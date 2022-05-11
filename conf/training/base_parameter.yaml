@@ -1,6 +1,8 @@
-use_cuda: ???
+use_cuda: true
 experiment_name: ???
 use_partial_cub: ???
+random_seed: 73
+model_name : ???
 partial_cub:
   selected_classes: ???
   random_select: ???

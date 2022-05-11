@@ -114,7 +114,7 @@ class MetricValueMeter(Meter):
         return n_sample, val
 
     def get_average(self) -> float:
-        return self.acc_val / self.acc_n_sample
+        return torch.mean(torch.Tensor(self.vals)).item()
 
 
 class JaccardScoreMeter(Meter):
