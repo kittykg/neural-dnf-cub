@@ -15,7 +15,7 @@ dnf_eo:
   optimiser_weight_decay: 0.00004
   scheduler_step: 100
   loss_func: ce
-  batch_size: 64
+  batch_size: 16
   epochs: 100
   initial_delta: 0.1
   delta_decay_delay: 5

@@ -49,11 +49,6 @@ class DnfClassifierTrainer:
     epochs: int
     reg_lambda: float
 
-    # Training meters, should be setup by _meters_setup()
-    train_loss_meter: MetricValueMeter
-    train_performance_score_meter: MultiClassAccuracyMeter
-    val_performance_score_meter: MultiClassAccuracyMeter
-
     # Delta decay scheduler
     delta_decay_scheduler: DeltaDelayedExponentialDecayScheduler
     delta_one_counter: int = -1
@@ -120,7 +115,7 @@ class DnfClassifierTrainer:
                 is_training=True,
                 batch_size=batch_size,
                 data_path_dict=_get_partial_cub_data_path_dict(),
-                use_img_tensor=False
+                use_img_tensor=False,
             )
         else:
             self.train_loader, self.val_loader = load_full_cub_data(
@@ -156,13 +151,6 @@ class DnfClassifierTrainer:
         # Other training parameters
         self.epochs = self.model_train_cfg["epochs"]
         self.reg_lambda = self.model_train_cfg["reg_lambda"]
-
-        # Training meters
-        self.train_loss_meter = MetricValueMeter(
-            f"train_{self.optimiser_key}_loss"
-        )
-        self.train_performance_score_meter = MultiClassAccuracyMeter()
-        self.val_performance_score_meter = MultiClassAccuracyMeter()
 
         self.delta_decay_scheduler = DeltaDelayedExponentialDecayScheduler(
             initial_delta=self.model_train_cfg["initial_delta"],
@@ -209,12 +197,12 @@ class DnfClassifierTrainer:
 
             loss = self._loss_calculation(y_hat, y, model.parameters())
 
+            loss.backward()
+            optimiser.step()
+
             # Update meters
             epoch_loss_meter.update(loss.item())
-            self.train_loss_meter.update(loss.item())
-
             epoch_perf_score_meter.update(y_hat, y)
-            self.train_performance_score_meter.update(y_hat, y)
 
         # Update delta value
         new_delta_val = self.delta_decay_scheduler.step(model, epoch)
@@ -263,23 +251,25 @@ class DnfClassifierTrainer:
             }
         )
 
+        plt.close(f1)
+        plt.close(f2)
+
     def _epoch_val(self, epoch: int, model: DNFBasedClassifier) -> float:
         epoch_val_loss_meter = MetricValueMeter("epoch_val_loss_meter")
         epoch_val_perf_score_meter = MultiClassAccuracyMeter()
 
         model.eval()
 
-        for i, data in enumerate(self.val_loader):
+        for data in self.val_loader:
             with torch.no_grad():
                 # Get model output and compute loss
                 x, y = get_dnf_classifier_x_and_y(data, self.use_cuda)
                 y_hat = model(x)
                 loss = self._loss_calculation(y_hat, y, model.parameters())
 
-            # Update meters
-            epoch_val_loss_meter.update(loss)
-            epoch_val_perf_score_meter.update(y_hat, y)
-            self.val_performance_score_meter.update(y_hat, y)
+                # Update meters
+                epoch_val_loss_meter.update(loss.item())
+                epoch_val_perf_score_meter.update(y_hat, y)
 
         avg_loss = epoch_val_loss_meter.get_average()
         avg_perf = epoch_val_perf_score_meter.get_average()

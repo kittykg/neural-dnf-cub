@@ -1,6 +1,7 @@
-import hydra
+import os
 import random
 
+import hydra
 import numpy as np
 from omegaconf import DictConfig, OmegaConf
 import torch
@@ -54,4 +55,5 @@ def run_experiment(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
+    # os.environ["WANDB_MODE"] = "disabled"
     run_experiment()
