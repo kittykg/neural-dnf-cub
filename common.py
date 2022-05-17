@@ -1,10 +1,12 @@
 from dataclasses import dataclass
+from typing import List
 
 from torch import Tensor
 
 # Constants
 INCEPTION_INPUT_SIZE: int = 299
 CUB_NUM_CLASSES: int = 200
+CUB_NUM_ALL_ATTRIBUTES: int = 312
 
 
 # Data structures
@@ -27,6 +29,14 @@ class CUBDatasetItem:
     label: int
     attr_present_label: Tensor
     attr_certainty: Tensor
+
+
+@dataclass
+class CUBRawDataItem:
+    img_id: int
+    img_path: str
+    label: int
+    attributes: List[Attribute]
 
 
 @dataclass

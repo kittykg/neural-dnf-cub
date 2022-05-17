@@ -1,5 +1,5 @@
 base_dnf:
-  num_preds: 112
+  num_preds: 34
   num_conjuncts: 9
   num_classes: 3
   weight_init_type: 'normal'

@@ -47,6 +47,7 @@ class DnfClassifierTrainer:
     loss_func_key: str
     criterion: Callable[[Tensor, Tensor], Tensor]
     epochs: int
+    reg_fn: str
     reg_lambda: float
 
     # Delta decay scheduler
@@ -150,6 +151,7 @@ class DnfClassifierTrainer:
 
         # Other training parameters
         self.epochs = self.model_train_cfg["epochs"]
+        self.reg_fn = self.model_train_cfg["reg_fn"]
         self.reg_lambda = self.model_train_cfg["reg_lambda"]
 
         self.delta_decay_scheduler = DeltaDelayedExponentialDecayScheduler(
@@ -294,14 +296,29 @@ class DnfClassifierTrainer:
         y: Tensor,
         parameters: Iterable[nn.parameter.Parameter],
     ) -> Tensor:
-        loss = self.criterion(y_hat, y)
+        if self.loss_func_key == "bce":
+            y_gt = torch.zeros(y_hat.shape)
+            y_gt[torch.arange(len(y)), y.long()] = 1
+            y_hat = (torch.tanh(y_hat) + 1) / 2
+        else:
+            y_gt = y
+
+        loss = self.criterion(y_hat, y_gt)
 
         if self.delta_one_counter >= 10:
             # Extra regularisation when delta has been 1 more than for 10.
             # Pushes weights towards 0, -6 or 6.
-            def weight_regulariser(w: Tensor):
+            def modified_l1_regulariser(w: Tensor):
                 return torch.abs(w * (6 - torch.abs(w))).sum()
 
+            def l1_regulariser(w: Tensor):
+                return torch.abs(w).sum()
+
+            weight_regulariser = (
+                modified_l1_regulariser
+                if self.reg_fn == "l1_mod"
+                else l1_regulariser
+            )
             reg = self.reg_lambda * sum(
                 [weight_regulariser(p.data) for p in parameters]
             )

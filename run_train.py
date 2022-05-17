@@ -42,15 +42,15 @@ def run_experiment(cfg: DictConfig) -> None:
     state_dict = trainer.train(model)
 
     # Save model
-    torch.save(state_dict, f"{experiment_name}.pth")
+    torch.save(state_dict, f"{experiment_name}_{random_seed}.pth")
     model_artifact = wandb.Artifact(
         f"{experiment_name}",
         type="model",
         description=f"{experiment_name} model",
         metadata=dict(wandb.config),
     )
-    model_artifact.add_file(f"{experiment_name}.pth")
-    wandb.save(f"{experiment_name}.pth")
+    model_artifact.add_file(f"{experiment_name}_{random_seed}.pth")
+    wandb.save(f"{experiment_name}_{random_seed}.pth")
     run.log_artifact(model_artifact)
 
 
