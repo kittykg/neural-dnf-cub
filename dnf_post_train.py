@@ -63,6 +63,19 @@ def prune_layer_weight(
     return prune_count
 
 
+def remove_unused_conjunctions(model: DNFBasedClassifier) -> int:
+    disj_w = model.dnf.disjunctions.weights.data.clone()
+    unused_count = 0
+
+    for i, w in enumerate(disj_w.T):
+        if torch.all(w == 0):
+            # The conjunction is not used at all
+            model.dnf.conjunctions.weights.data[i, :] = 0
+            unused_count += 1
+
+    return unused_count
+
+
 def apply_threshold(
     model: DNFBasedClassifier,
     og_conj_weight: Tensor,
@@ -128,6 +141,7 @@ def extract_asp_rules(sd: OrderedDict, flatten: bool = False) -> List[str]:
                     output_rules.append(
                         f"conj_{j} :- {', '.join(conjunction_map[j])}."
                     )
+                    output_rules.append(f"class_({i}) :- not conj_{j}.")
                 else:
                     disjuncts.append(f"not conj_{j}")
             elif v > 0 and j in conjunction_map:

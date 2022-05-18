@@ -24,17 +24,17 @@ def run_experiment(cfg: DictConfig) -> None:
         config=OmegaConf.to_container(cfg["training"][model_name]),
     )
 
-    # Set up model
-    model_class = DNFClassifier if model_name == "dnf" else DNFClassifierEO
-    base_cfg = OmegaConf.to_container(cfg["model"]["base_dnf"])
-    model = model_class(**base_cfg)
-    model.set_delta_val(cfg["training"][model_name]["initial_delta"])
-
     # Set random seed
     random_seed = cfg["training"]["random_seed"]
     torch.manual_seed(random_seed)
     random.seed(random_seed)
     np.random.seed(random_seed)
+
+    # Set up model
+    model_class = DNFClassifier if model_name == "dnf" else DNFClassifierEO
+    base_cfg = OmegaConf.to_container(cfg["model"]["base_dnf"])
+    model = model_class(**base_cfg)
+    model.set_delta_val(cfg["training"][model_name]["initial_delta"])
 
     torch.autograd.set_detect_anomaly(True)
 

@@ -297,7 +297,7 @@ class DnfClassifierTrainer:
         parameters: Iterable[nn.parameter.Parameter],
     ) -> Tensor:
         if self.loss_func_key == "bce":
-            y_gt = torch.zeros(y_hat.shape)
+            y_gt = torch.zeros(y_hat.shape, device=y_hat.device)
             y_gt[torch.arange(len(y)), y.long()] = 1
             y_hat = (torch.tanh(y_hat) + 1) / 2
         else:
