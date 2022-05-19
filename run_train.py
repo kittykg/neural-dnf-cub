@@ -31,7 +31,9 @@ def run_experiment(cfg: DictConfig) -> None:
     np.random.seed(random_seed)
 
     # Set up model
-    model_class = DNFClassifier if model_name == "dnf" else DNFClassifierEO
+    model_class = (
+        DNFClassifier if model_name == "dnf_vanilla" else DNFClassifierEO
+    )
     base_cfg = OmegaConf.to_container(cfg["model"]["base_dnf"])
     model = model_class(**base_cfg)
     model.set_delta_val(cfg["training"][model_name]["initial_delta"])

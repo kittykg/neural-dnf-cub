@@ -141,7 +141,7 @@ def extract_asp_rules(sd: OrderedDict, flatten: bool = False) -> List[str]:
                     output_rules.append(
                         f"conj_{j} :- {', '.join(conjunction_map[j])}."
                     )
-                    output_rules.append(f"class_({i}) :- not conj_{j}.")
+                    output_rules.append(f"class({i}) :- not conj_{j}.")
                 else:
                     disjuncts.append(f"not conj_{j}")
             elif v > 0 and j in conjunction_map:
