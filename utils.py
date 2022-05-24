@@ -1,3 +1,4 @@
+from collections import Counter
 import pickle
 import random
 import sys
@@ -5,11 +6,11 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import torch
 from torch import Tensor, nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 from torchvision.transforms import transforms
 
 from common import INCEPTION_INPUT_SIZE, CUBDNDataItem
-from dataset import CUBDNDataset
+from dataset import CUBDNDataset, ImbalancedDatasetSampler
 from rule_learner import DNFBasedClassifier
 
 
@@ -156,14 +157,25 @@ def _get_cub_dataloader(
                 transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[2, 2, 2]),
             ]
         )
+
     drop_last = is_training
-    shuffle = is_training
+
+    dataset = CUBDNDataset(dataset, cub_img_dir, transform, use_img_tensor)
+
+    num_samples = len(dataset)
+    get_sample_label = lambda i: dataset.__getitem__(i)["label"]
+    label_counter = Counter([get_sample_label(i) for i in range(num_samples)])
+    samples_weight = torch.Tensor(
+        [1 / label_counter[get_sample_label(i)] for i in range(num_samples)]
+    )
 
     return DataLoader(
-        CUBDNDataset(dataset, cub_img_dir, transform, use_img_tensor),
+        dataset=dataset,
         batch_size=batch_size,
-        shuffle=shuffle,
         drop_last=drop_last,
+        sampler=WeightedRandomSampler(
+            samples_weight, num_samples, replacement=True
+        ),
     )
 
 
