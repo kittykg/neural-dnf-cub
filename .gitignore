@@ -135,3 +135,6 @@ dmypy.json
 # experiment output
 outputs/
 notebooks/
+
+# scripts
+scripts/

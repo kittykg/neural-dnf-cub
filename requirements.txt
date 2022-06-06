@@ -1,0 +1,14 @@
+torch >= 1.11.0
+numpy
+matplotlib
+plotly
+wandb
+hydra-core
+clingo
+torchvision
+scikit-learn
+tqdm
+pylint
+black
+notebook
+jupyter

@@ -1,14 +1,14 @@
-import os
 import random
 
 import hydra
+from hydra.core.hydra_config import HydraConfig
 import numpy as np
 from omegaconf import DictConfig, OmegaConf
 import torch
 import wandb
 
 
-from rule_learner import DNFClassifier, DNFClassifierEO, DNFBasedClassifier
+from rule_learner import DNFClassifier, DNFClassifierEO
 from train import DnfClassifierTrainer
 
 
@@ -22,6 +22,7 @@ def run_experiment(cfg: DictConfig) -> None:
         project="cub-3",
         entity="kittykg",
         config=OmegaConf.to_container(cfg["training"][model_name]),
+        dir=HydraConfig.get().run.dir,
     )
 
     # Set random seed

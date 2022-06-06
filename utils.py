@@ -1,7 +1,4 @@
 from collections import Counter
-import pickle
-import random
-import sys
 from typing import Dict, List, Optional, Tuple, Union
 
 import torch
@@ -10,7 +7,7 @@ from torch.utils.data import DataLoader, WeightedRandomSampler
 from torchvision.transforms import transforms
 
 from common import INCEPTION_INPUT_SIZE, CUBDNDataItem
-from dataset import CUBDNDataset, ImbalancedDatasetSampler
+from dataset import CUBDNDataset
 from rule_learner import DNFBasedClassifier
 
 
@@ -253,44 +250,3 @@ def load_pretrained_model_state_dict(
 def freeze_model(model: nn.Module):
     for _, param in model.named_parameters():
         param.requires_grad = False
-
-
-def gen_las_example(pkl_data_path: str, save_file_path: str) -> int:
-    def gen_example_from_data(sample: CUBDNDataItem, file=sys.stdout):
-        # Penalty and inclusion set
-        print(
-            f"#pos(eg_{sample.img_id}@{10}, "
-            f"{{class({sample.label - 1})}}, {{",
-            file=file,
-        )
-
-        # Exclusion set
-        exclusion_set = ",\n".join(
-            filter(
-                lambda j: j != "",
-                map(
-                    lambda k: f"    class({k})"
-                    if k != sample.label - 1
-                    else "",
-                    range(3),
-                ),
-            )
-        )
-        print(exclusion_set, file=file)
-
-        print("}, {", file=file)
-
-        # Context
-        for i, attr in enumerate(sample.attr_present_label.int()):
-            if attr.item() == 0:
-                continue
-            print(f"    has_attr_{i}.", file=file)
-
-        print("}).\n", file=file)
-
-    with open(pkl_data_path, "rb") as f:
-        cub_train = pickle.load(f)
-
-    with open(save_file_path, "w") as f:
-        for sample in cub_train:
-            gen_example_from_data(sample, f)

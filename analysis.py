@@ -27,19 +27,24 @@ class BinaryAccuracyMeter(Meter):
         Pre-conditions:
           - `output` and `target` are of the same type of tensor
           - `output` and `target` should both be binary
-          - `output` would be in dimensions like: ... 'x 1', or already squeezed
-            the last 'x 1' dimension.
+          - `output` would be in the dimension of N x 1 or N.
         """
-        output_shape_tensor: Tensor = torch.Tensor(list(output.shape))
-        if output_shape_tensor[-1] == 1:
-            output_shape_tensor = output.squeeze(-1)
+        starting_len = len(self.accuracy_list)
+        output = output.squeeze(-1)
 
-        n_sample = int(torch.prod(output_shape_tensor).item())
+        n_sample = len(output)
         n_correct = torch.sum(output == target).item()
 
         self.accuracy_list.append(n_correct / n_sample)
+        ending_len = len(self.accuracy_list)
+
+        if ending_len - starting_len != 1:
+            print('what the actual crap is going on here seriously dude????')
 
     def get_average(self) -> float:
+        if torch.isnan(torch.mean(torch.Tensor(self.accuracy_list))):
+            print('nani')
+            print(self.accuracy_list)
         return torch.mean(torch.Tensor(self.accuracy_list)).item()
 
 
