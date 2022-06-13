@@ -19,6 +19,7 @@ def dnf_eval(
     use_cuda: bool,
     data_loader: DataLoader,
     use_jaccard_meter: bool = False,
+    jaccard_threshold: float = 0.0,
     do_logging: bool = False,
 ):
     model.eval()
@@ -37,7 +38,7 @@ def dnf_eval(
             x, y = get_dnf_classifier_x_and_y(data, use_cuda)
             y_hat = model(x)
             if use_jaccard_meter:
-                y_hat = (torch.tanh(y_hat) > 0).long()
+                y_hat = (torch.tanh(y_hat) > jaccard_threshold).long()
 
             iter_perf_meter.update(y_hat, y)
             performance_meter.update(y_hat, y)
@@ -57,7 +58,7 @@ def dnf_eval(
 
 
 def asp_eval(
-    test_data: List[CUBDNDataItem], rules: List[str]
+    test_data: List[CUBDNDataItem], rules: List[str], debug: bool = False
 ) -> Tuple[float, float]:
     total_sample_count = 0
     correct_count = 0
@@ -77,6 +78,13 @@ def asp_eval(
         ctl.ground([("base", [])])
 
         all_answer_sets = [str(a) for a in ctl.solve(yield_=True)]
+
+        target_class = f"class({d.label - 1})"
+
+        if debug:
+            # Print out
+            print(f"y: {target_class}  AS: {all_answer_sets}")
+
         if len(all_answer_sets) != 1:
             jaccard_scores.append(0)
             continue
@@ -84,7 +92,6 @@ def asp_eval(
         output_classes = all_answer_sets[0].split(" ")
         output_classes_set = set(output_classes)
 
-        target_class = f"class({d.label - 1})"
         target_class_set = {target_class}
 
         jacc = len(output_classes_set & target_class_set) / len(

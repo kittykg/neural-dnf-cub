@@ -1,4 +1,5 @@
 from collections import Counter
+from enum import Enum
 from typing import Dict, List, Optional, Tuple, Union
 
 import torch
@@ -17,6 +18,12 @@ from rule_learner import DNFBasedClassifier
 
 FULL_PKL_KEYS = ["full_train_pkl", "full_val_pkl", "full_test_pkl"]
 PARTIAL_PKL_KEYS = ["partial_train_pkl", "partial_val_pkl", "partial_test_pkl"]
+
+
+class DataloaderMode(Enum):
+    TRAIN = "train"
+    VAL = "val"
+    TEST = "test"
 
 
 def load_partial_cub_data(
@@ -100,14 +107,14 @@ def _load_cub_data(
     if is_training:
         train_loader = _get_cub_dataloader(
             dataset=data_collect_fn(data_path_list[0]),
-            is_training=is_training,
+            dataloader_mode=DataloaderMode.TRAIN,
             batch_size=batch_size,
             cub_img_dir=cub_img_dir,
             use_img_tensor=use_img_tensor,
         )
         val_loader = _get_cub_dataloader(
             dataset=data_collect_fn(data_path_list[1]),
-            is_training=is_training,
+            dataloader_mode=DataloaderMode.VAL,
             batch_size=batch_size,
             cub_img_dir=cub_img_dir,
             use_img_tensor=use_img_tensor,
@@ -116,7 +123,7 @@ def _load_cub_data(
     else:
         test_loader = _get_cub_dataloader(
             dataset=data_collect_fn(data_path_list[2]),
-            is_training=is_training,
+            dataloader_mode=DataloaderMode.TEST,
             batch_size=batch_size,
             cub_img_dir=cub_img_dir,
             use_img_tensor=use_img_tensor,
@@ -126,7 +133,7 @@ def _load_cub_data(
 
 def _get_cub_dataloader(
     dataset: List[CUBDNDataset],
-    is_training: bool,
+    dataloader_mode: DataloaderMode,
     batch_size: int,
     cub_img_dir: str,
     use_img_tensor: bool = True,
@@ -134,7 +141,15 @@ def _get_cub_dataloader(
     """
     Get data loaders of CUB dataset
     """
-    if is_training:
+    if dataloader_mode == DataloaderMode.TEST:
+        transform = transforms.Compose(
+            [
+                transforms.CenterCrop(INCEPTION_INPUT_SIZE),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[2, 2, 2]),
+            ]
+        )
+    else:
         transform = transforms.Compose(
             [
                 transforms.ColorJitter(
@@ -146,33 +161,40 @@ def _get_cub_dataloader(
                 transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[2, 2, 2]),
             ]
         )
-    else:
-        transform = transforms.Compose(
-            [
-                transforms.CenterCrop(INCEPTION_INPUT_SIZE),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[2, 2, 2]),
-            ]
-        )
-
-    drop_last = is_training
 
     dataset = CUBDNDataset(dataset, cub_img_dir, transform, use_img_tensor)
-
     num_samples = len(dataset)
-    get_sample_label = lambda i: dataset.__getitem__(i)["label"]
-    label_counter = Counter([get_sample_label(i) for i in range(num_samples)])
-    samples_weight = torch.Tensor(
-        [1 / label_counter[get_sample_label(i)] for i in range(num_samples)]
+
+    # Sampler
+    if dataloader_mode == DataloaderMode.TRAIN:
+        get_sample_label = lambda i: dataset.__getitem__(i)["label"]
+        label_counter = Counter(
+            [get_sample_label(i) for i in range(num_samples)]
+        )
+        sampler = WeightedRandomSampler(
+            weights=torch.Tensor(
+                [
+                    1 / label_counter[get_sample_label(i)]
+                    for i in range(num_samples)
+                ]
+            ),
+            num_samples=num_samples,
+            replacement=True,
+        )
+    else:
+        sampler = None
+
+    # Othere parameters for dataloader
+    drop_last = dataloader_mode == DataloaderMode.TRAIN
+    loader_batch_size = (
+        num_samples if dataloader_mode == DataloaderMode.VAL else batch_size
     )
 
     return DataLoader(
         dataset=dataset,
-        batch_size=batch_size,
+        batch_size=loader_batch_size,
         drop_last=drop_last,
-        sampler=WeightedRandomSampler(
-            samples_weight, num_samples, replacement=True
-        ),
+        sampler=sampler,
     )
 
 

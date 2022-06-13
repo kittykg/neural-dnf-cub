@@ -153,6 +153,7 @@ def extract_asp_rules(sd: OrderedDict, flatten: bool = False) -> List[str]:
                     disjuncts.append(f"conj_{j}")
 
         if not flatten:
-            output_rules.append(f"class({i}) :- {'; '.join(disjuncts)}.")
+            for disjunct in disjuncts:
+                output_rules.append(f"class({i}) :- {disjunct}.")
 
     return output_rules
