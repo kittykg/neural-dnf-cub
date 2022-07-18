@@ -3,7 +3,7 @@ from typing import OrderedDict, List
 import torch
 from torch import Tensor
 from torch.utils.data import DataLoader
-import tqdm
+from tqdm import tqdm
 
 from dnf_layer import SemiSymbolicLayerType
 from eval import dnf_eval

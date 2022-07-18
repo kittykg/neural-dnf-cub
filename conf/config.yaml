@@ -3,3 +3,7 @@ defaults:
   - environment: doc
   - model: config
   - training: base_parameter
+
+hydra:
+  run:
+    dir: /vol/bitbucket/kg3217/cub_project/cub_3_outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}

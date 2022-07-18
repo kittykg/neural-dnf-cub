@@ -248,8 +248,8 @@ class DnfClassifierTrainer:
                 "delta": new_delta_val,
                 "train/loss": avg_loss,
                 "train/accuracy": avg_perf,
-                "conj_w_hist": f1,
-                "disj_w_hist": f2,
+                # "conj_w_hist": f1,
+                # "disj_w_hist": f2,
             }
         )
 

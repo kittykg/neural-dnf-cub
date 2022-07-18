@@ -60,9 +60,11 @@ def gen_las_background_knowledge(
         print("#modeh(class(const(class_id))).", file=f)
         for i in range(num_attributes):
             print(f"#modeb(has_attr_{i}).", file=f)
-            if is_ilasp:
+            if not is_ilasp:
+                # FastLas requires explicit 'not' to include in hypothesis space
                 print(f"#modeb(not has_attr_{i}).", file=f)
         if not is_ilasp:
+            # FastLas scoring function
             print('#bias("penalty(1, head).").', file=f)
             print('#bias("penalty(1, body(X)) :- in_body(X).").', file=f)
 
