@@ -1,4 +1,4 @@
-class_id(0..9).
+class_id(0..14).
 :- class(X),  class(Y),  X < Y.
 #modeh(class(const(class_id))).
 #modeb(has_attr_0).
@@ -81,7 +81,5 @@ class_id(0..9).
 #modeb(not has_attr_38).
 #modeb(has_attr_39).
 #modeb(not has_attr_39).
-#modeb(has_attr_40).
-#modeb(not has_attr_40).
 #bias("penalty(1, head).").
 #bias("penalty(1, body(X)) :- in_body(X).").

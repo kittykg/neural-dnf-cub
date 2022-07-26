@@ -244,8 +244,9 @@ class DeltaDelayedExponentialDecayScheduler:
         if step < self.delta_decay_delay:
             new_delta_val = self.initial_delta
         else:
+            delta_step = step - self.delta_decay_delay
             new_delta_val = self.initial_delta * (
-                self.delta_decay_rate ** (step // self.delta_decay_steps)
+                self.delta_decay_rate ** (delta_step // self.delta_decay_steps)
             )
         new_delta_val = 1 if new_delta_val > 1 else new_delta_val
         model.set_delta_val(new_delta_val)
