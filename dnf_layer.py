@@ -18,6 +18,7 @@ class SemiSymbolic(nn.Module):
         layer_type: SemiSymbolicLayerType,
         delta: float,
         weight_init_type: str = "normal",
+        epsilon: float = 0.001,
     ) -> None:
         super(SemiSymbolic, self).__init__()
 
@@ -35,18 +36,29 @@ class SemiSymbolic(nn.Module):
             nn.init.uniform_(self.weights, a=-6, b=6)
         self.delta = delta
 
+        # For DNF min
+        self.epsilon = epsilon
+
     def forward(self, input: Tensor) -> Tensor:
         # Input: N x P
         abs_weight = torch.abs(self.weights)
         # abs_weight: Q x P
         max_abs_w = torch.max(abs_weight, dim=1)[0]
         # max_abs_w: Q
+
+        # nonzero_weight = torch.where(
+        #     abs_weight > self.epsilon, abs_weight.double(), 100.0
+        # )
+        # nonzero_min = torch.min(nonzero_weight, dim=1)[0]
+
         sum_abs_w = torch.sum(abs_weight, dim=1)
         # sum_abs_w: Q
         if self.layer_type == SemiSymbolicLayerType.CONJUNCTION:
             bias = max_abs_w - sum_abs_w
+            # bias = nonzero_min - sum_abs_w
         else:
             bias = sum_abs_w - max_abs_w
+            # bias = sum_abs_w - nonzero_min
         # bias: Q
 
         out = input @ self.weights.T
@@ -55,7 +67,7 @@ class SemiSymbolic(nn.Module):
         # out_bias: Q
         sum = out + out_bias
         # sum: N x Q
-        return sum
+        return sum  # .float()
 
 
 class ConstraintLayer(SemiSymbolic):

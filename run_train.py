@@ -1,3 +1,4 @@
+import os
 import random
 
 import hydra
@@ -58,5 +59,5 @@ def run_experiment(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
-    # os.environ["WANDB_MODE"] = "disabled"
+    os.environ["WANDB_MODE"] = "disabled"
     run_experiment()
