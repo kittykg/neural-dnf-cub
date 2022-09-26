@@ -1,0 +1,8 @@
+# See las_gen.py for detailed args
+cd ..
+python las_gen.py \
+-bk fastlas/bk_c100.las \
+-e fastlas/example_c100.las \
+-t ??? \ # input dir
+-nc 100 \
+-na 82

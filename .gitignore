@@ -135,9 +135,12 @@ dmypy.json
 # experiment output
 outputs/
 notebooks/
+fastlas/
 
 # scripts
-scripts/
+scripts/*.sh
+
+# config
 conf/config.yaml
 conf/environment/doc.yaml
 conf/training/dnf_eo.yaml

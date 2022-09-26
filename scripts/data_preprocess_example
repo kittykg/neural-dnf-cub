@@ -1,0 +1,9 @@
+# See data_preprocess.py for detailed args
+cd ..
+python data_preprocess.py \
+-rtrain ??? \ # raw input train data
+-rval ??? \ # raw input val data
+-rtest ??? \ # raw input test data
+-nc 3 \
+-t 1 \
+-od ??? # output dir
