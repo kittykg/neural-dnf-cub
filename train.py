@@ -33,6 +33,28 @@ loss_func_map: Dict[str, Callable[[Tensor, Tensor], Tensor]] = {
 }
 
 
+def get_full_cub_data_path_dict(env_cfg: DictConfig) -> Dict[str, str]:
+    for k in FULL_PKL_KEYS:
+        assert k in env_cfg
+    data_path_dict = {}
+    for k in FULL_PKL_KEYS:
+        data_path_dict[k] = env_cfg[k]
+    data_path_dict["cub_images_dir"] = env_cfg["cub_images_dir"]
+    return data_path_dict
+
+
+def get_partial_cub_data_path_dict(
+    env_cfg: DictConfig, partial_cub_cfg: DictConfig
+) -> Dict[str, str]:
+    for k in PARTIAL_PKL_KEYS:
+        assert k in partial_cub_cfg
+    data_path_dict = {}
+    for k in PARTIAL_PKL_KEYS:
+        data_path_dict[k] = partial_cub_cfg[k]
+    data_path_dict["cub_images_dir"] = env_cfg["cub_images_dir"]
+    return data_path_dict
+
+
 class DnfClassifierTrainer:
     # Data loaders
     train_loader: DataLoader
@@ -76,53 +98,21 @@ class DnfClassifierTrainer:
 
         batch_size = self.model_train_cfg["batch_size"]
 
-        def _get_full_cub_data_path_dict():
-            for k in FULL_PKL_KEYS:
-                assert k in env_cfg
-            data_path_dict = {}
-            for k in FULL_PKL_KEYS:
-                data_path_dict[k] = env_cfg[k]
-            data_path_dict["cub_images_dir"] = env_cfg["cub_images_dir"]
-            return data_path_dict
-
-        def _get_partial_cub_data_path_dict():
-            for k in PARTIAL_PKL_KEYS:
-                assert k in partial_cub_cfg
-            data_path_dict = {}
-            for k in PARTIAL_PKL_KEYS:
-                data_path_dict[k] = partial_cub_cfg[k]
-            data_path_dict["cub_images_dir"] = env_cfg["cub_images_dir"]
-            return data_path_dict
-
-        if use_partial_cub and "selected_classes" in partial_cub_cfg:
-            # Use selected classes
-            selected_classes = OmegaConf.to_container(
-                partial_cub_cfg["selected_classes"]
-            )
+        if use_partial_cub:
+            # Use existing partial pkl files
             self.train_loader, self.val_loader = load_partial_cub_data(
                 is_training=True,
                 batch_size=batch_size,
-                data_path_dict=_get_full_cub_data_path_dict(),
-                selected_classes=selected_classes,
-                use_img_tensor=False,
-            )
-            pass
-        elif use_partial_cub and "random_select" in partial_cub_cfg:
-            # Randomly select a number of classes, based on 'random_select'
-            pass
-        elif use_partial_cub:
-            # Use existing pkl files
-            self.train_loader, self.val_loader = load_partial_cub_data(
-                is_training=True,
-                batch_size=batch_size,
-                data_path_dict=_get_partial_cub_data_path_dict(),
+                data_path_dict=get_partial_cub_data_path_dict(
+                    env_cfg, partial_cub_cfg
+                ),
                 use_img_tensor=False,
             )
         else:
             self.train_loader, self.val_loader = load_full_cub_data(
                 is_training=True,
                 batch_size=batch_size,
-                data_path_dict=_get_full_cub_data_path_dict(),
+                data_path_dict=get_full_cub_data_path_dict(env_cfg),
                 use_img_tensor=False,
             )
 

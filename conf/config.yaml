@@ -3,6 +3,7 @@ defaults:
   - environment: doc
   - model: config
   - training: base_parameter
+  - webhook: webhook
 
 hydra:
   run:

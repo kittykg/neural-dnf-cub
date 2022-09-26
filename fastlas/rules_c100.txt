@@ -1,0 +1,100 @@
+class(79) :- has_attr_48, has_attr_26, has_attr_68.
+class(80) :- has_attr_20, has_attr_16.
+class(90) :- has_attr_26, has_attr_80, not has_attr_39.
+class(17) :- has_attr_70, has_attr_21, not has_attr_15.
+class(54) :- has_attr_45, has_attr_61.
+class(64) :- has_attr_0, not has_attr_64.
+class(9) :- has_attr_71, has_attr_29, has_attr_81.
+class(98) :- has_attr_37, has_attr_1.
+class(96) :- has_attr_62, has_attr_81, has_attr_70.
+class(81) :- has_attr_4, not has_attr_8, not has_attr_62.
+class(4) :- has_attr_51, not has_attr_33.
+class(84) :- has_attr_41, has_attr_16.
+class(71) :- has_attr_71, has_attr_56, not has_attr_60.
+class(6) :- has_attr_32, has_attr_31.
+class(75) :- has_attr_52, not has_attr_14.
+class(87) :- has_attr_29, has_attr_72.
+class(97) :- has_attr_35, has_attr_34.
+class(40) :- has_attr_78, has_attr_54.
+class(15) :- has_attr_72, has_attr_61.
+class(16) :- has_attr_31, has_attr_61, not has_attr_73.
+class(35) :- has_attr_51, has_attr_46.
+class(95) :- has_attr_29, has_attr_63.
+class(59) :- has_attr_6, has_attr_42.
+class(78) :- has_attr_16, has_attr_66.
+class(76) :- has_attr_76, has_attr_67.
+class(33) :- has_attr_65, has_attr_42.
+class(50) :- not has_attr_9, not has_attr_33.
+class(10) :- has_attr_75, has_attr_68.
+class(26) :- has_attr_29, has_attr_1, has_attr_21.
+class(92) :- has_attr_40, not has_attr_32.
+class(91) :- has_attr_41, not has_attr_15, not has_attr_2.
+class(66) :- has_attr_63, has_attr_57.
+class(83) :- has_attr_25, has_attr_1.
+class(20) :- has_attr_26, has_attr_16, not has_attr_10.
+class(21) :- has_attr_37, has_attr_2.
+class(32) :- has_attr_76, has_attr_54.
+class(47) :- has_attr_47, not has_attr_39.
+class(46) :- has_attr_25, has_attr_67.
+class(41) :- has_attr_79, has_attr_57.
+class(11) :- has_attr_28, not has_attr_64.
+class(45) :- has_attr_37, has_attr_42.
+class(3) :- has_attr_35, has_attr_26, not has_attr_1, not has_attr_59.
+class(52) :- has_attr_41, has_attr_25.
+class(85) :- has_attr_20, has_attr_70.
+class(13) :- has_attr_53, has_attr_26, has_attr_72.
+class(36) :- has_attr_80, has_attr_57.
+class(0) :- has_attr_11, has_attr_0.
+class(56) :- has_attr_44, has_attr_31.
+class(55) :- has_attr_2, has_attr_18.
+class(12) :- has_attr_2, has_attr_20.
+class(73) :- has_attr_79, not has_attr_60.
+class(94) :- has_attr_6, has_attr_72.
+class(24) :- has_attr_56, has_attr_79, has_attr_13, not has_attr_0, not has_attr_53.
+class(23) :- has_attr_51, not has_attr_70, not has_attr_73.
+class(65) :- has_attr_0, has_attr_61.
+class(61) :- has_attr_25, has_attr_63, not has_attr_81.
+class(39) :- has_attr_26, has_attr_1, not has_attr_15.
+class(43) :- has_attr_0, not has_attr_34.
+class(89) :- has_attr_10, not has_attr_33.
+class(5) :- has_attr_11, has_attr_80.
+class(34) :- has_attr_22, not has_attr_17, not has_attr_60.
+class(67) :- has_attr_15, has_attr_57, not has_attr_60.
+class(58) :- has_attr_24, has_attr_23.
+class(74) :- has_attr_31, has_attr_74.
+class(37) :- has_attr_27, has_attr_12.
+class(42) :- has_attr_7, has_attr_57.
+class(57) :- has_attr_6, has_attr_54.
+class(51) :- has_attr_41, has_attr_60.
+class(1) :- has_attr_17, has_attr_0.
+class(31) :- has_attr_38, not has_attr_23, not has_attr_66.
+class(70) :- has_attr_79, has_attr_68, has_attr_8.
+class(72) :- has_attr_44, has_attr_72.
+class(53) :- has_attr_43, has_attr_36.
+class(77) :- has_attr_80, has_attr_4.
+class(88) :- has_attr_19, not has_attr_5.
+class(30) :- has_attr_75, has_attr_72.
+class(22) :- has_attr_26, has_attr_0, has_attr_73.
+class(19) :- has_attr_3, has_attr_67, not has_attr_80.
+class(99) :- has_attr_62, has_attr_70, not has_attr_60.
+class(86) :- has_attr_7, has_attr_61.
+class(69) :- has_attr_53, has_attr_57, not has_attr_64.
+class(63) :- has_attr_0, has_attr_73, not has_attr_43.
+class(25) :- has_attr_51, has_attr_59, not has_attr_55.
+class(27) :- has_attr_41, has_attr_62.
+class(68) :- has_attr_22, has_attr_81.
+class(62) :- has_attr_79, has_attr_6.
+class(44) :- has_attr_0, has_attr_42, not has_attr_60.
+class(18) :- has_attr_79, has_attr_49, not has_attr_70.
+class(14) :- has_attr_9, has_attr_36.
+class(8) :- has_attr_53, has_attr_64, not has_attr_34, not has_attr_59.
+class(93) :- has_attr_61, has_attr_42.
+class(38) :- has_attr_30, has_attr_42, not has_attr_52.
+class(49) :- has_attr_63, has_attr_42.
+class(2) :- has_attr_0, has_attr_70.
+class(82) :- has_attr_45, has_attr_26.
+class(60) :- has_attr_76, not has_attr_55.
+class(29) :- has_attr_34, has_attr_39, not has_attr_56, not has_attr_55.
+class(7) :- has_attr_58, has_attr_79.
+class(28) :- has_attr_56, has_attr_1.
+class(48) :- has_attr_51, not has_attr_19.
