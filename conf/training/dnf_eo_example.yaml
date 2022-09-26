@@ -1,0 +1,27 @@
+# Example of dnf_eo config, create dnf_eo.yaml with something like this
+# defaults:
+#   - base_parameter
+
+# use_cuda: false
+# experiment_name: dnf_eo_10_ce_l1_mod
+# use_partial_cub: true
+# model_name: dnf_eo
+# partial_cub:
+#   partial_train_pkl: ???
+#   partial_val_pkl: ???
+#   partial_test_pkl: ???
+
+# dnf_eo:
+#   optimiser: adam
+#   optimiser_lr: 0.001
+#   optimiser_weight_decay: 0.00004
+#   scheduler_step: 100
+#   loss_func: ce
+#   batch_size: 32
+#   epochs: 100
+#   initial_delta: 0.1
+#   delta_decay_delay: 5
+#   delta_decay_steps: 1
+#   delta_decay_rate: 1.1
+#   reg_fn: l1_mod
+#   reg_lambda: 0.1

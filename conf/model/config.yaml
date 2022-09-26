@@ -1,3 +1,4 @@
+# Change this config for different DNF model architecture
 base_dnf:
   num_preds: 34
   num_conjuncts: 9

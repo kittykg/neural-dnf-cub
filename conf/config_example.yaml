@@ -1,0 +1,11 @@
+# Example config setup, create file of config.yaml with something like this
+# defaults:
+#   - _self_
+#   - environment: ???
+#   - model: config
+#   - training: base_parameter
+#   - webhook: webhook
+
+# hydra:
+#   run:
+#     dir: ???
