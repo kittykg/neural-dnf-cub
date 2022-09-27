@@ -7,5 +7,7 @@
 #   - webhook: webhook
 
 # hydra:
+#   job:
+#      chdir: True # Hydra 1.2 onwards won't change dir so output will be dumped in work dir
 #   run:
 #     dir: ???

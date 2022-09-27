@@ -13,7 +13,7 @@ from rule_learner import DNFClassifier, DNFClassifierEO
 from train import DnfClassifierTrainer
 
 
-@hydra.main(config_path="conf", config_name="config")
+@hydra.main(version_base=None, config_path="conf", config_name="config")
 def run_experiment(cfg: DictConfig) -> None:
     experiment_name = cfg["training"]["experiment_name"]
     model_name = cfg["training"]["model_name"]

@@ -121,7 +121,7 @@ def run_post_training_processing(
     return result_dict
 
 
-@hydra.main(config_path="conf", config_name="config")
+@hydra.main(version_base=None, config_path="conf", config_name="config")
 def run_pipeline(cfg: DictConfig) -> None:
     # Config parameters
     random_seed = cfg["training"]["random_seed"]
