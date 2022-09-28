@@ -1,6 +1,6 @@
 from collections import Counter
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 import torch
 from torch import Tensor, nn
@@ -30,22 +30,17 @@ def load_partial_cub_data(
     is_training: bool,
     batch_size: int,
     data_path_dict: Dict[str, str],
-    selected_classes: Optional[List[int]] = None,
-    random_select: Optional[int] = None,
     use_img_tensor: bool = True,
-) -> Union[Tuple[DataLoader, DataLoader], DataLoader]:
-    if not selected_classes and not random_select:
-        # Use exisiting pkl files
-        # data_path_dict should contain specified pkl file path
-        return _load_cub_data(
-            is_training=is_training,
-            batch_size=batch_size,
-            data_path_list=[data_path_dict[k] for k in PARTIAL_PKL_KEYS],
-            cub_img_dir=data_path_dict["cub_images_dir"],
-            use_img_tensor=use_img_tensor,
-        )
-
-    # TODO: implement selected classes and random select
+) -> Tuple[DataLoader, DataLoader] | DataLoader:
+    # Use exisiting pkl files
+    # data_path_dict should contain specified pkl file path
+    return _load_cub_data(
+        is_training=is_training,
+        batch_size=batch_size,
+        data_path_list=[data_path_dict[k] for k in PARTIAL_PKL_KEYS],
+        cub_img_dir=data_path_dict["cub_images_dir"],
+        use_img_tensor=use_img_tensor,
+    )
 
 
 def load_full_cub_data(
@@ -53,7 +48,7 @@ def load_full_cub_data(
     batch_size: int,
     data_path_dict: Dict[str, str],
     use_img_tensor: bool = True,
-) -> Union[Tuple[DataLoader, DataLoader], DataLoader]:
+) -> Tuple[DataLoader, DataLoader] | DataLoader:
     return _load_cub_data(
         is_training=is_training,
         batch_size=batch_size,
@@ -68,9 +63,8 @@ def _load_cub_data(
     batch_size: int,
     data_path_list: List[str],
     cub_img_dir: str,
-    selected_classes: Optional[List[int]] = None,
     use_img_tensor: bool = True,
-) -> Union[Tuple[DataLoader, DataLoader], DataLoader]:
+) -> Tuple[DataLoader, DataLoader] | DataLoader:
     """Load partial CUB data according to selected classes
 
     Args:
@@ -95,25 +89,16 @@ def _load_cub_data(
         with open(data_pkl_path, "rb") as f:
             return pickle.load(f)
 
-    def _get_partial_data(data_pkl_path: str) -> List[CUBDNDataItem]:
-        assert selected_classes
-        full_data = _get_data_from_pkl(data_pkl_path)
-        return [d for d in full_data if d.label in selected_classes]
-
-    data_collect_fn = (
-        _get_partial_data if selected_classes else _get_data_from_pkl
-    )
-
     if is_training:
         train_loader = _get_cub_dataloader(
-            dataset=data_collect_fn(data_path_list[0]),
+            dataset=_get_data_from_pkl(data_path_list[0]),
             dataloader_mode=DataloaderMode.TRAIN,
             batch_size=batch_size,
             cub_img_dir=cub_img_dir,
             use_img_tensor=use_img_tensor,
         )
         val_loader = _get_cub_dataloader(
-            dataset=data_collect_fn(data_path_list[1]),
+            dataset=_get_data_from_pkl(data_path_list[1]),
             dataloader_mode=DataloaderMode.VAL,
             batch_size=batch_size,
             cub_img_dir=cub_img_dir,
@@ -122,7 +107,7 @@ def _load_cub_data(
         return train_loader, val_loader
     else:
         test_loader = _get_cub_dataloader(
-            dataset=data_collect_fn(data_path_list[2]),
+            dataset=_get_data_from_pkl(data_path_list[2]),
             dataloader_mode=DataloaderMode.TEST,
             batch_size=batch_size,
             cub_img_dir=cub_img_dir,
@@ -132,7 +117,7 @@ def _load_cub_data(
 
 
 def _get_cub_dataloader(
-    dataset: List[CUBDNDataset],
+    dataset: List[CUBDNDataItem],
     dataloader_mode: DataloaderMode,
     batch_size: int,
     cub_img_dir: str,
@@ -153,7 +138,7 @@ def _get_cub_dataloader(
         transform = transforms.Compose(
             [
                 transforms.ColorJitter(
-                    brightness=32 / 255, saturation=(0.5, 1.5)
+                    brightness=32 / 255, saturation=(0.5, 1.5)  # type: ignore
                 ),
                 transforms.RandomResizedCrop(INCEPTION_INPUT_SIZE),
                 transforms.RandomHorizontalFlip(),
@@ -162,22 +147,22 @@ def _get_cub_dataloader(
             ]
         )
 
-    dataset = CUBDNDataset(dataset, cub_img_dir, transform, use_img_tensor)
-    num_samples = len(dataset)
+    cub_dn_dataset = CUBDNDataset(
+        dataset, cub_img_dir, transform, use_img_tensor
+    )
+    num_samples = len(cub_dn_dataset)
 
     # Sampler
     if dataloader_mode == DataloaderMode.TRAIN:
-        get_sample_label = lambda i: dataset.__getitem__(i)["label"]
+        get_sample_label = lambda i: cub_dn_dataset.__getitem__(i)["label"]
         label_counter = Counter(
             [get_sample_label(i) for i in range(num_samples)]
         )
         sampler = WeightedRandomSampler(
-            weights=torch.Tensor(
-                [
-                    1 / label_counter[get_sample_label(i)]
-                    for i in range(num_samples)
-                ]
-            ),
+            weights=[
+                1 / label_counter[get_sample_label(i)]
+                for i in range(num_samples)
+            ],
             num_samples=num_samples,
             replacement=True,
         )
@@ -191,7 +176,7 @@ def _get_cub_dataloader(
     )
 
     return DataLoader(
-        dataset=dataset,
+        dataset=cub_dn_dataset,
         batch_size=loader_batch_size,
         drop_last=drop_last,
         sampler=sampler,

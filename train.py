@@ -151,7 +151,7 @@ class DnfClassifierTrainer:
             delta_decay_rate=self.model_train_cfg["delta_decay_rate"],
         )
 
-    def train(self, model: DNFBasedClassifier) -> OrderedDict:
+    def train(self, model: DNFBasedClassifier) -> dict:
         seed = torch.get_rng_state()[0].item()
         log.info(f"{self.experiment_name} starts, seed: {seed}")
 
