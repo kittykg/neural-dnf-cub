@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import pickle
 import random
 import requests
 import traceback
@@ -139,6 +140,10 @@ def run_pipeline(cfg: DictConfig) -> None:
     try:
         model = run_train(cfg, experiment_name, random_seed)
         result_dict = run_post_training_processing(model_name, cfg, model)
+        with open(
+            f"{experiment_name}_full_pipeline_result_dict.pkl", "wb"
+        ) as f:
+            pickle.dump(result_dict, f)
         webhook_msg = convert_result_dict_to_discord_message(
             experiment_name, random_seed, is_eo_based, result_dict
         )
