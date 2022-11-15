@@ -1,8 +1,8 @@
 import logging
 import pickle
-from typing import Callable, Dict, Iterable, List, OrderedDict, Tuple
+from typing import Callable, Dict, Iterable, List, OrderedDict
 
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 import torch
 from torch import Tensor
 from torch.optim import Optimizer
@@ -476,6 +476,9 @@ class DNFBasedPostTrainingProcessor:
         log.info("Extracted rules result:")
         log.info(f"Accuracy:   {acc:.3f}")
         log.info(f"Jacc score: {avg_jacc_score:.3f}")
+
+        with open(self.pth_file_base_name + "_rules.txt", "w") as f:
+            f.write("\n".join(rules))
 
         self.result_dict["rule_acc"] = round(acc, 3)
         self.result_dict["rule_jacc"] = round(avg_jacc_score, 3)

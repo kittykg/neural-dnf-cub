@@ -86,6 +86,7 @@ def asp_eval(
             print(f"y: {target_class}  AS: {all_answer_sets}")
 
         if len(all_answer_sets) != 1:
+            # No model or multiple models
             jaccard_scores.append(0)
             continue
 

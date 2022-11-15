@@ -44,7 +44,7 @@ def convert_result_dict_to_discord_message(
         s += f"""```
         After train     Acc    Jacc
             DNF-EO      {rd['after_train_acc']}  {rd['after_train_jacc']}
-            DNF         {rd['pd_after_train_acc']}  {rd['pd_after_train_acc']}
+            DNF         {rd['pd_after_train_acc']}  {rd['pd_after_train_jacc']}
         After prune     Acc    Jacc
             DNF                {rd['after_prune']}
         After tune      Acc    Jacc
