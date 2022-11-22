@@ -139,6 +139,7 @@ fastlas/
 
 # scripts
 scripts/*.sh
+scripts/*.py
 
 # config
 conf/config.yaml

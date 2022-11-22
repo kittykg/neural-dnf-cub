@@ -89,6 +89,23 @@ def remove_unused_conjunctions(model: DNFBasedClassifier) -> int:
     return unused_count
 
 
+def remove_disjunctions_when_empty_conjunctions(
+    model: DNFBasedClassifier,
+) -> int:
+    # If a conjunction has all 0 weights (no input atom is used), then this
+    # conjunction shouldn't be used in a rule.
+    conj_w = model.dnf.conjunctions.weights.data.clone()
+    unused_count = 0
+
+    for i, w in enumerate(conj_w):
+        if torch.all(w == 0):
+            # This conjunction should not be used
+            model.dnf.disjunctions.weights.data.T[i, :] = 0
+            unused_count += model.dnf.disjunctions.weights.shape[0]
+
+    return unused_count
+
+
 def apply_threshold(
     model: DNFBasedClassifier,
     og_conj_weight: Tensor,
@@ -107,7 +124,7 @@ def apply_threshold(
     model.dnf.disjunctions.weights.data = new_disj_weight
 
 
-def extract_asp_rules(sd: OrderedDict, flatten: bool = False) -> List[str]:
+def extract_asp_rules(sd: dict, flatten: bool = False) -> List[str]:
     output_rules = []
 
     # Get all conjunctions
@@ -243,7 +260,7 @@ class DNFBasedPostTrainingProcessor:
                 env_cfg, partial_cub_cfg
             ),
             use_img_tensor=False,
-        )
+        )  # type: ignore
 
         self.test_pkl_path = partial_cub_cfg["partial_test_pkl"]
 
@@ -272,11 +289,21 @@ class DNFBasedPostTrainingProcessor:
         raise NotImplementedError
 
     def _pruning(self, model: DNFBasedClassifier) -> None:
+        # Pruning proceduse:
+        # 1. Prune disjunction
+        # 2. Prune unused conjunctions
+        #   - If a conjunction is not used in any disjunctions, pruned the
+        #     entire disjunct body
+        # 3. Prune conjunctions
+        # 4. Prune disjunctions that uses empty conjunctions
+        #   - If a conjunction has no conjunct, no disjunctions should use it
+        # 5. Prune disjunction again
         if self.is_eo_based:
             log.info("Pruning on plain DNF of DNF-EO starts")
         else:
             log.info("Pruning on DNF starts")
 
+        # 1. Prune disjunction
         log.info("Prune disj layer")
         prune_count = prune_layer_weight(
             model,
@@ -290,9 +317,11 @@ class DNFBasedPostTrainingProcessor:
         log.info(f"Pruned disj count:   {prune_count}")
         log.info(f"New perf after disj: {new_perf:.3f}")
 
+        # 2. Prune unused conjunctions
         unused_conj = remove_unused_conjunctions(model)
         log.info(f"Remove unused conjunctios: {unused_conj}")
 
+        # 3. Prune conjunctions
         log.info("Prune conj layer")
         prune_count = prune_layer_weight(
             model,
@@ -302,12 +331,35 @@ class DNFBasedPostTrainingProcessor:
             self.use_cuda,
             use_jaccard_meter=True,
         )
-        new_perf = dnf_eval(model, self.use_cuda, self.test_loader, True)
+        new_perf = dnf_eval(model, self.use_cuda, self.val_loader, True)
         log.info(f"Pruned conj count:   {prune_count}")
-        log.info(f"New perf after conj: {new_perf:.3f}\n")
+        log.info(f"New perf after conj: {new_perf:.3f}")
+
+        # 4. Prune disjunctions that uses empty conjunctions
+        removed_disj = remove_disjunctions_when_empty_conjunctions(model)
+        log.info(
+            f"Remove disjunction that uses empty conjunctions: {removed_disj}"
+        )
+
+        # 5. Prune disjunction again
+        log.info("Prune disj layer again")
+        prune_count = prune_layer_weight(
+            model,
+            SemiSymbolicLayerType.DISJUNCTION,
+            self.prune_epsilon,
+            self.val_loader,
+            self.use_cuda,
+            use_jaccard_meter=True,
+        )
+        new_perf = dnf_eval(model, self.use_cuda, self.val_loader, True)
+        new_perf_test = dnf_eval(model, self.use_cuda, self.test_loader, True)
+        log.info(f"Pruned disj count (2nd):   {prune_count}")
+        log.info(f"New perf after disj (2nd): {new_perf:.3f}")
+        log.info(f"New perf after prune (test): {new_perf_test:.3f}\n")
 
         torch.save(model.state_dict(), self.pth_file_base_name + "_pruned.pth")
-        self.result_dict["after_prune"] = round(new_perf, 3)
+        self.result_dict["after_prune_val"] = round(new_perf, 3)
+        self.result_dict["after_prune_test"] = round(new_perf_test, 3)
 
     def _tuning(self, model: DNFBasedClassifier) -> None:
         log.info(f"Tuning of {'DNF-EO' if self.is_eo_based else 'DNF'} start")
@@ -549,6 +601,9 @@ class DNFEOPostTrainingProcessor(DNFBasedPostTrainingProcessor):
         num_conjuncts = model.dnf.conjunctions.weights.shape[0]
         num_classes = model.dnf.disjunctions.weights.shape[0]
         model2 = DNFClassifier(num_preds, num_conjuncts, num_classes)
+
+        if self.use_cuda:
+            model2.to("cuda")
 
         sd = model.state_dict()
         sd.pop("eo_layer.weights")

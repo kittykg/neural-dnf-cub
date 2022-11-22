@@ -103,7 +103,7 @@ class DNFClassifierEO(DNFBasedClassifier):
         self.dnf.disjunctions.delta = delta_val
         self.eo_layer.delta = delta_val
 
-    def load_dnf_state_dict(self, sd: OrderedDict) -> None:
+    def load_dnf_state_dict(self, sd: dict) -> None:
         # Assuming that sd is from a DNF Classifier model
         sd_keys = list(sd.keys())
         for k in sd_keys:
@@ -180,7 +180,7 @@ class DNFClassifierSP(CtoYClassifier):
             self.dnfsp.conjunctions.weights.data.shape
         )
         self.disj_weight_mask = [
-            torch.ones(l.weights.data.shape) for l in self.dnfsp.disjunctions
+            torch.ones(l.weights.data.shape) for l in self.dnfsp.disjunctions  # type: ignore
         ]
 
     def forward(self, input: Tensor) -> Tensor:
@@ -192,7 +192,7 @@ class DNFClassifierSP(CtoYClassifier):
     def set_delta_val(self, delta_val: float) -> None:
         self.dnfsp.conjunctions.delta = delta_val
         for l in self.dnfsp.disjunctions:
-            l.delta = delta_val
+            l.delta = delta_val  # type: ignore
 
     def update_weight_wrt_mask(self) -> None:
         self.dnfsp.conjunctions.weights.data *= self.conj_weight_mask
