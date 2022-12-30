@@ -77,7 +77,8 @@ def asp_eval(
         ctl.add("base", [], " ".join(asp_base))
         ctl.ground([("base", [])])
 
-        all_answer_sets = [str(a) for a in ctl.solve(yield_=True)]
+        with ctl.solve(yield_=True) as handle:  # type: ignore
+            all_answer_sets = [str(a) for a in handle]
 
         target_class = f"class({d.label - 1})"
 

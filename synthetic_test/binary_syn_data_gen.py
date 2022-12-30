@@ -22,6 +22,8 @@ def evaluate_dnf(
 
 
 def generate_data() -> str:
+    # Code from Nuri's pix2rule synthetic dataset, with minor changes
+
     rng = np.random.default_rng(seed=RNG_SEED)
     max_rng_tries = 100  # Number of tries before we give up generating
 
@@ -119,6 +121,11 @@ def generate_data() -> str:
     # Save the file
     print(f"Creating {str(FILE_PATH)} with keys: {str(data.keys())}")
     np.savez_compressed(FILE_PATH, **data)
+
+    # Output rules to STDOUT
+    for r in rule_asp:
+        print(r)
+
     return str(FILE_PATH)
 
 

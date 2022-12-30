@@ -1,6 +1,10 @@
-# Neuro-symbolic Rule Learning with DNF based models in CUB dataset/subsets
+# Neuro-symbolic Rule Learning with Neural DNF-based Models in CUB dataset/subsets
 
-DNF based models are created based on pix2rule's semi-symbolic layer.
+Neural DNF-based models are created on
+[pix2rule](https://github.com/nuric/pix2rule)[1]'s semi-symbolic layers.
+
+Check out sibling repo: [Neuro-symbolic rule learning with neural DNF
+models in TMC dataset/subsets](https://github.com/kittykg/neural-dnf-tmc)
 
 ## Requirements
 
@@ -22,10 +26,14 @@ DNF based models are created based on pix2rule's semi-symbolic layer.
 
 * [scikit-learn](https://scikit-learn.org/stable/index.html) - metrics & decision tree
 
-## CUB dataset
+## CUB dataset/subsets
 
 TODO
 
 ## Running instructions
 
 TODO
+
+## References
+
+[1] [Nuri Cingillioglu et al., pix2rule: End-to-end Neuro-symbolic Rule Learning.](https://arxiv.org/abs/2106.07487)

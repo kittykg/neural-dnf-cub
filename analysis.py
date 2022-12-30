@@ -42,9 +42,6 @@ class BinaryAccuracyMeter(Meter):
             print('what the actual crap is going on here seriously dude????')
 
     def get_average(self) -> float:
-        if torch.isnan(torch.mean(torch.Tensor(self.accuracy_list))):
-            print('nani')
-            print(self.accuracy_list)
         return torch.mean(torch.Tensor(self.accuracy_list)).item()
 
 
@@ -104,7 +101,7 @@ class JaccardScoreMeter(Meter):
         y_np = y.detach().cpu().numpy()
         output_np = output.detach().cpu().numpy()
         avg = jaccard_score(y_np, output_np, average="samples")
-        self.jacc_scores.append(avg)
+        self.jacc_scores.append(avg) # type: ignore
 
     def get_average(self) -> float:
         return sum(self.jacc_scores) / len(self.jacc_scores)
