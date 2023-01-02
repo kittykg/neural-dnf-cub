@@ -146,4 +146,5 @@ conf/config.yaml
 conf/environment/doc.yaml
 conf/training/dnf_eo.yaml
 conf/training/dnf_vanilla.yaml
+conf/wandb/wandb.yaml
 conf/webhook/webhook.yaml

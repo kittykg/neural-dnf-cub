@@ -5,6 +5,7 @@
 #   - model: config
 #   - training: base_parameter
 #   - webhook: webhook
+#   - wandb: wandb
 
 # hydra:
 #   job:

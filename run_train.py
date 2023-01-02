@@ -20,8 +20,8 @@ def run_experiment(cfg: DictConfig) -> None:
 
     # Set up wandb
     run = wandb.init(
-        project="cub-3",
-        entity="kittykg",
+        project=cfg["wandb"]["project"],
+        entity=cfg["wandb"]["entity"],
         config=OmegaConf.to_container(cfg["training"][model_name]),
         dir=HydraConfig.get().run.dir,
     )
