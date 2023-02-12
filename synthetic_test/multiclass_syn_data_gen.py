@@ -4,9 +4,9 @@ import clingo
 import numpy as np
 
 RNG_SEED = 73
-NUM_NULLARY = 15
-NUM_CONJUNCTS = 9
-NUM_CLASSES = 3
+NUM_NULLARY = 150
+NUM_CONJUNCTS = 75
+NUM_CLASSES = 25
 FILE_PATH = f"synth_multiclass_data_in{NUM_NULLARY}_conj{NUM_CONJUNCTS}_out{NUM_CLASSES}.npz"
 GEN_SIZE = 10000
 
@@ -82,27 +82,20 @@ def generate_data() -> str:
                 "Could not generate unique conjuncts, "
                 "try increasing the language size."
             )
+    print("And kernel generated...")
 
     # Create or_kernel such that each rule uses a subset of conjunctions.
-    # We also make each sub-kernel different. This is not necessary, but gives
-    # more variety.
     or_kernel = np.zeros((num_conjuncts, num_classes)).astype(int)
     seen_sub_kernel = []
     for i in range(num_classes):
         while True:
-            sub_kernel = rng.choice([-1, 0, 1], size=conj_to_use)
-            if not sub_kernel.any():
-                # Each rule need at least one conjunction (negated or not)
-                continue
-            unique = True
-            for s in seen_sub_kernel:
-                if (sub_kernel == s).all():
-                    unique = False
-                    continue
-            if unique:
+            sub_kernel = rng.choice([0, 1], size=conj_to_use)
+            if sub_kernel.any():
+                # Each rule need at least one conjunction
                 break
         seen_sub_kernel.append(sub_kernel)
         or_kernel[i * conj_to_use : (i + 1) * conj_to_use, i] = sub_kernel
+    print("Or kernel generated...")
 
     rule_asp = get_rule_asp(and_kernel, or_kernel)
     show_statements = get_show_statements(num_classes)
@@ -131,7 +124,7 @@ def generate_data() -> str:
             idx = np.where(c != 0)[0]
             if (example[idx] == c[idx]).all():
                 multiple_classes = True
-                continue
+                break
         if multiple_classes:
             # More than one class, ignore this example
             continue

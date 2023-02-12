@@ -12,19 +12,22 @@ models in TMC dataset/subsets](https://github.com/kittykg/neural-dnf-tmc)
 
 **Dataset**: Caltech-UCSD Birds-200-2011 - download:
 [link](https://drive.google.com/file/d/1hbzc_P1FuxMkcabkgn9ZKinBwW683j45/view)
+(this link may not be working any more)
 
 **Libraries**: 
 
-* [Pytorch](https://pytorch.org/) version >= 1.11.0 - machine learning framework
+* [Pytorch](https://pytorch.org/) version >= 1.12.0 - machine learning framework
 
     - [Torchvision](https://pytorch.org/vision/stable/index.html) - computer
-      vision library
+      vision library. Not used for the rule learning from CUB attributes, but
+      left in the code for future end-to-end learning from CUB images 
 
 * [Hydra](https://hydra.cc/) version >= 1.2 - config management framework
 
 * [Clingo](https://potassco.org/clingo/) - ASP solver
 
-* [scikit-learn](https://scikit-learn.org/stable/index.html) - metrics & decision tree
+* [scikit-learn](https://scikit-learn.org/stable/index.html) - metrics &
+decision tree
 
 ## CUB dataset/subsets
 

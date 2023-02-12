@@ -84,11 +84,11 @@ def asp_eval(
 
         if debug:
             # Print out
-            print(f"y: {target_class}  AS: {all_answer_sets}")
+            log.info(f"y: {target_class}  AS: {all_answer_sets}")
 
         if len(all_answer_sets) != 1:
-            # No model or multiple models
-            jaccard_scores.append(0)
+            # No model or multiple answer sets, should not happen
+            log.warn(f"No model or multiple answer sets when evaluating rules.")
             continue
 
         output_classes = all_answer_sets[0].split(" ")
