@@ -70,6 +70,13 @@ class SemiSymbolic(nn.Module):
         return sum  # .float()
 
 
+"""
+A generic implementation of constraint layer that can mimic any sort of
+constraint.
+This is not required for the neural DNF-EO model, since the neural DNF-EO
+model's constraint can be initialised easily as a full -6 matrix except 0 on the
+diagonal.
+
 class ConstraintLayer(SemiSymbolic):
     def __init__(
         self,
@@ -91,6 +98,7 @@ class ConstraintLayer(SemiSymbolic):
                     self.weights.data[class_idx, i] = -6
             if not enable_training:
                 self.requires_grad_(False)
+"""
 
 
 class DNF(nn.Module):
@@ -133,6 +141,10 @@ class DNF(nn.Module):
 
         return disj
 
+
+"""
+This version DNFSP is an attempt of enforcing mutual exclusion on outputs
+without the constraint layer.
 
 class DNFSP(nn.Module):
     num_conj_per_disj: int
@@ -188,3 +200,4 @@ class DNFSP(nn.Module):
         # disj: N x R
 
         return disj
+    """

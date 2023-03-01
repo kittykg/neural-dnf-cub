@@ -1,4 +1,4 @@
-from typing import Any, Tuple, List, Optional
+from typing import List
 
 from sklearn.metrics import jaccard_score
 import torch

@@ -5,10 +5,10 @@ from torch import nn, Tensor
 
 from dnf_layer import (
     DNF,
-    DNFSP,
+    # DNFSP,
     SemiSymbolic,
     SemiSymbolicLayerType,
-    ConstraintLayer,
+    # ConstraintLayer,
 )
 
 
@@ -111,7 +111,12 @@ class DNFClassifierEO(DNFBasedClassifier):
         self.dnf.load_state_dict(sd)
 
 
+"""
+Other attempts on enforcing mutual exclusivity without an exactly one
+constraint layer.
+
 class DNFClassifierCS(DNFBasedClassifier):
+    # Implements more complex constraint after training a vanilla neural DNF
     cs_layer: ConstraintLayer
 
     def __init__(
@@ -160,6 +165,7 @@ class DNFClassifierCS(DNFBasedClassifier):
 
 
 class DNFClassifierSP(CtoYClassifier):
+    # uses grouping to try enforcing mutual exclusivity
     conj_weight_mask: Tensor
     disj_weight_mask: List[Tensor]
 
@@ -198,7 +204,11 @@ class DNFClassifierSP(CtoYClassifier):
         self.dnfsp.conjunctions.weights.data *= self.conj_weight_mask
         for i, m in enumerate(self.disj_weight_mask):
             self.dnfsp.disjunctions[i].weights.data *= m
+"""
 
+"""
+A single layer MLP, identical to the concept-class classifier in Concept
+Bottleneck Model paper.
 
 class SingleLayerClassifier(CtoYClassifier):
     def __init__(self, num_preds: int, num_classes: int) -> None:
@@ -211,3 +221,4 @@ class SingleLayerClassifier(CtoYClassifier):
         out = self.linear(input)
         # out: N x R
         return out
+"""
