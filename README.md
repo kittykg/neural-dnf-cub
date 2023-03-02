@@ -46,11 +46,10 @@ model.
 * `data_preprocess.py`: data pre-processing script for CUB dataset, also used
 for generating subsets. We follow the same pre-processing used in [Concept Bottleneck Models paper](https://github.com/yewsiang/ConceptBottleneck) [4].
 
-
-* `las_gen.py`: script for generating FastLAS learning example and mode biases.
-
 * `full_pipeline_dnf.py`: full pipeline of training a neural DNF-EO model and
 post-training processing.
+
+* `las_gen.py`: script for generating FastLAS learning example and mode biases.
 
 * `mlp_baseline.py`: full pipeline of training and evaluation of MLP.
 
@@ -65,11 +64,6 @@ mutual exclusivity (i.e. predicting exactly one class at a time).
 
 ![vanilla neural DNF](figure/vanilla_neural_DNF.png)
 
-<script
-  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
-  type="text/javascript">
-</script>
-
 One of our contributions in the paper is the **neural DNF-EO model**
 (in `rule_learner.py`), which enforces mutual exclusivity with the constraint
 layer. The constraint layer mimics the logic formula
@@ -82,13 +76,13 @@ only use the plain neural DNF to make predictions.
 
 ## Requirements
 
-**Base python**: version >= 3.10
+**Base python version**: >= 3.10
 
 **Dataset**: Caltech-UCSD Birds-200-2011 - download:
 [link](https://drive.google.com/file/d/1hbzc_P1FuxMkcabkgn9ZKinBwW683j45/view)
 (this link may not be working any more)
 
-**Libraries**: 
+**Python libraries**: 
 
 * [Pytorch](https://pytorch.org/) version >= 1.12.0 - machine learning framework
 
@@ -103,9 +97,54 @@ only use the plain neural DNF to make predictions.
 * [scikit-learn](https://scikit-learn.org/stable/index.html) - metrics &
 decision tree
 
+**Optional requirements**:
+
+* [FastLAS](https://github.com/spike-imperial/FastLAS/releases) - for symbolic
+learning from ASP. Our neural DNF-EO model does not require FastLAS.
+
 ## Running instructions
 
-TODO
+**Data pre-processing**
+
+To reproduce our experiments, you will first need to pre-process the data and
+create CUB subsets. Go to `scripts/` and we have more instructions there.
+
+**Neural DNF-EO model**
+
+To run the full training pipeline for neural DNF-EO model, edit the configs in
+`conf/` (for more information on how to manage hydra config, refer to their
+[documentation](https://hydra.cc/docs/intro/)). We create a `dnf_eo_example.yaml`
+in `conf/training/` for example setup.
+
+In particular, the important yaml files need to be edited are:
+
+* `conf/model/config.yaml`: for changing model architectural design.
+
+* `conf/training/dnf_eo.yaml`: training config for the neural DNF-EO experiment.
+
+* `conf/environment/[name].yaml`: paths for the pkl files.
+
+Once you setup the configs, you can run the following command:
+
+```
+python full_pipeline_dnf.py [hydra config overwrites]
+```
+
+**MLP**
+
+To run the training pipeline for MLP baseline, edit the training configs in the
+`mlp_baseline.py` script, and you still need `conf/environment/` set up. Once
+ready, run the following command:
+
+```
+python mlp_baseline.py [hydra config overwrites]
+```
+
+**FastLAS**
+
+You will need to install [FastLAS](https://github.com/spike-imperial/FastLAS/releases)
+and clingo first. Once you have them installed, got to `scripts/` and we have
+further instructions for generating FastLAS learning tasks and running.
 
 ## References
 
